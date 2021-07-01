@@ -1,0 +1,244 @@
+---
+title: "CEO SALARY ANALYSIS"
+author: "F. Eren Dalçık "
+date: "13 06 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(haven)
+library(PerformanceAnalytics)
+library(corrplot)
+library(car)
+library(effects)
+library(dplyr)
+library(ggplot2)
+```
+
+# PAPER INTRODUCTION
+
+In this project, I defined 4 questions related to ceosal data. 
+
+I started to answer the questions with an analysis of the data set.
+
+I assigned the data to a dataset named "ceodata" using the tidyverse library and "read_dta()" function.
+
+```{r echo= FALSE}
+
+ceodata <- read_dta(file = "ceosal.dta")
+
+```
+
+## Data Analysis and Exploration
+
+```{r echo=FALSE}
+summary(ceodata)
+```
+*We have 209 observations and 12 variables in "ceosal" CEO Salaries data. These variables are:*
+
+
+*1. salary  	1990 CEO salary, thousands $,*
+*2. pcsalary	 % change salary, 89-90,*
+*3. sales 	1990 firm sales, millions $,*
+*4. roe		return on equity, 88-90 avg,*
+*5. pcroe	 % change roe, 88-90,*
+*6. ros		return on firm's stock, 88-90,*
+*7. indus	dummy variable for sector; it is equal 1 if industrial firm,*
+*8. finance	dummy variable for sector; it is equal 1 if financial firm,*
+*9. consprod	dummy variable for sector; it is equal 1 if consumer product firm,*
+*10. utility	dummy variable for sector; it is 1 if transport. or utilties firm,*
+*11. lsalary	log of salary,*  
+*12. lsales	log of sales.*
+
+
+**It will be good a starting point to analyze our dataset with summary function. According to the data, we can see that the minimum salary that CEOs are gaining is 736 thousand dollars and the maximum wage CEOs gaining is 14 million and 822 thousand dollars. The average salary that CEOs are gaining is 1 million and 281 dollars. Since sectors have dummy variables in the data we can say that most of the CEO's are working in the industry sector than the consumer product sector comes because these variables mean is somewhat close to 1 but more than the other sectors.** 
+
+
+
+
+
+#### Following Plots and Analyses are About the "ceosal" data.
+
+
+
+```{r , echo = FALSE}
+Salary = ggplot(aes(x=salary), data=ceodata)+
+  geom_histogram(binwidth = 150, fill='darkred', color='black')+
+  ggtitle("Salary Distribution")
+Salary
+
+```
+
+This is a simple salary distribution histogram plot of the CEO's. We can see that it is right-skewed.
+
+
+```{r echo=FALSE}
+outliers <- boxplot.stats(ceodata$salary)$out
+
+boxplot(ceodata$salary,
+        height = 800,
+        width= 800,
+        ylim = c(0,4500),
+        ylab = "Salary",
+        main = "Boxplot of Salary With Outliers")
+
+out <- which(ceodata$salary %in% c(outliers))
+```
+
+
+From this plot, we can see that there are 9 outliers in the salaries of the CEO's. These outlier values are: 2983,3844,4143,6640,3142,3068,11233, 3646 and 14822.
+
+
+
+
+```{r , echo = FALSE}
+
+plot <- ggplot(data = ceodata , aes(ros, salary)) +
+  geom_point(alpha = 1)+
+  geom_smooth(method = "lm" , se = FALSE)
+plot
+
+
+```
+
+From this plot, we can see that there is a negative linear relationship between the salary of the CEO and the ros variable.
+
+
+## Project Questions
+
+
+### Question 1: 
+### In terms of the model parameters, state the null hypothesis that, after controlling for sales and roe, ros has no effect on CEO salary. State the alternative that better stock market performance increases a CEO’s salary. ###
+
+```{}
+
+H0 : β3 = 0. H1 : β3 > 0
+
+```
+
+
+### Question 2: 
+### Using the ceosal data frame, ###
+
+
+### a) Summarize and interpret the variables of the model to estimate using statistical tools and graphics.
+
+
+
+```{r , echo = FALSE}
+
+scatterplotMatrix ( ~ lsalary + lsales + roe + ros , data = ceodata )
+
+```
+
+
+
+```{}
+
+Since salary and sales variables right-skewed (positive skew distribution) for this used their log-transformed type. If we take the log of a variable outliers will come closer to the mean, so that we can have a normal distribution on our data. For the regression analyses, we should use the log transformation of the data. It can be seen that there is a positive relationship between sales and salary. As sales increase the salary of the CEOs are increasing. On the other hand, there is a negative trend between sales and the return on the firm's stock (ros). It might be wrong but from my point of view, as a firm's stocks lose return in their stock, their sales are negatively impacted. 
+
+```
+
+
+### b)	Estimate the model of CEO salary using OLS.
+
+```{r , echo = FALSE}
+salary.mod <- lm(lsalary ~  lsales + roe + pcroe + ros + indus + finance + consprod  , data = ceodata)
+summary(salary.mod)
+```
+
+### c) Using diagnosis tests for the estimated model, validate the assumptions of OLS.
+
+```{}
+
+I used log transformation of salary and sales variable to get a better result and I removed some variables that were generating an error in the linear model. 
+Looking at the residuals we can see that they have close magnitudes which means without plotting this model we can say that our line has a good fit. Since we used the log transformation of the variables, errors that might occur from the outliers is eliminated.
+It is good to have a median that is close to 0. It will show us that our model is not skewed one way or another.
+
+
+```
+
+
+
+### d) Interpret the estimated model. 
+
+```{}
+
+The most important part of the regression model output is the f-statistics part. It shows us that whether our model is significant or not. From looking at the p-value of the model we can say that our model is significant and there is a relation between the variables. Residual standard error provides us a measurement, standard error of the residuals. Both of the R-squared gives us the measurement of what % of the variance in response variable can be explained. Multiple R- squared shows us the amount of variation in the response variable by the predictor variable. Adjusted R-squared will not increase as we add more data to the dataset. If a model has too much difference between Adjusted and Multiple R-squared this means that the model may be overfitting in our case there is no such issue. In contrast, we can say that our variables can explain 34% of the variation in the salary of the CEO. Since it is a multiple regression model we are more interested in the value of Adjusted R-squared.
+After we are confident that our model is significant we can interpret our coefficients. Variables with the highest significance are sales, finance, consprod. For the lsales we can say that 1 unit of change in sales of a company will cause that estimate to increase by 0.25 unit. So as a company makes more sales that company's CEO's salary gets higher. std error of a coefficient means the average amount that the estimates vary from the actual value. For lsales it not high. For the t value, we assume that if it is high magnitude coefficient will be statistically significant. As we can see the highest t value is for the lsales. 
+The same interpretation can be made for the other values that are lower than .05. For example in the finance variable (since it is a dummy variable that only consists of 1 and 0. 1 means that is a financial firm) 1 unit of change in coefficient has a positive 0.46 on the estimate, in my opinion, this means if a CEO is working in a finance firm they are earning more than the other CEO's.
+
+```
+
+
+
+
+
+### e)By what percentage is salary predicted to increase if ros increases by 50 points? Does ros have a practically large effect on salary?
+
+```{r , echo = FALSE}
+
+salary.mod2 <- lm(lsalary ~  lsales + roe + ros  , data = ceodata)
+summary(salary.mod2)
+
+```
+
+
+```{r , echo = FALSE}
+
+plot(predictorEffects(salary.mod2))
+
+```
+
+```{}
+ 
+From the predictor effect plots we can see that in sales, the light blue area becomes very thin towards the mean of lsales. We can say there is a significant relationship but in ros situation is not same like in the sales. Predictor effect plots help us to solve this dimensional by looking at one or two more dimensional plots for each predictor in the model. Instead of saying ros is equal to 0 we should say ros is insignificant, it has a weak relationship, it is not safe to analyze by looking at the light blue area in the plot. There is high relativity.
+
+```
+
+
+
+```{}
+ 
+For this question I created another regression model where I predicted the value of lsalary with lsales, roe and ros. In this model our equation is as follows: 
+log(salary)= 4.32 + .280log(sales) + .0174roe + .00024ros. 
+I must say that this model's p-value is not lower than .05 and ros is not significant too. But this was the only model where ros has a positive estimate so I will answer the question related to this model. 
+
+Effect of roe on salary is .00024. Since in question it asks the effect of the ros in salary if it is increased by 50 points. That makes the .00024 equal to .012. If we multiply this value by 100 we will get a 1.2% change. This means 50 point increase in ros will increase the salary by only 1.2% which is a very small effect for ros. A 1.2% increase in CEO salary according to 50% return on sales does not seem profitable.
+
+```
+
+### Question 3: 
+
+### Test the null hypothesis that ros has no effect on salary against the alternative that ros has a positive effect. Carry out the test at the 10%, 5%, and 1% significance level.###
+
+
+
+```{}
+
+Critical value for the test using df = 200 is 1.29 in table. The t-stat on ros is .00024 / .00054 = .44. It is way below the critical value in the table. We fail to reject the H0 at the 10% significance level.
+ 
+ 
+```
+
+
+
+### Question 4: 
+
+### Should we include ros in a final model explaining CEO compensation in terms of firm performance?.###
+
+
+
+```{}
+
+Since in the plot that is in ther parts of this paper we were able to see that ros and CEO salary has a negative linear relationship and we have the proof of this assumption in the scatterplot and linear model regression too. ros has high variability when it comes to explaning the ceo salary. Rather than including it as zero, including the ros may not cause harm to our prediction but it is important to consider the correlation of this variable with other variables.
+ 
+ 
+```
+
+
+
+
+
