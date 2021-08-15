@@ -31,7 +31,7 @@ ceodata <- read_dta(file = "ceosal.dta")
 
 ```
 
-## Data Analysis and Exploration
+# Data Analysis and Exploration
 
 ```{r echo=FALSE}
 summary(ceodata)
@@ -59,7 +59,7 @@ summary(ceodata)
 
 
 
-#### Following Plots and Analyses are About the "ceosal" data.
+## Following Plots and Analyses are About the "ceosal" data.
 
 
 
