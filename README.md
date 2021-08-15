@@ -8,11 +8,20 @@ I started to answer the questions with an analysis of the data set.
 
 I aimed to find the relation between top CEO's salaries and which type of accounting state of their company, such as Return on Sales, Return on Investments.
 
-### Content
+## Content
 
 I conducted my analysis and modeling using R. I also created an HTML output of the analysis using RMarkdown. You can view the results with this file.
 
-### Example plots:
+## Scope of Project
+
+1. Introduction
+
+2. Data Analysis and Exploration
+      1. Plots and Analyses
+
+3. Project Questions
+
+## Example plots:
 
 ![resim](https://user-images.githubusercontent.com/74188001/124120526-8a898400-da7c-11eb-8b76-35731a3f9bc7.png)
 
